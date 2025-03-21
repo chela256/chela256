@@ -1,0 +1,7 @@
+# Red Hat Single Sign-On 7.6 for OpenJDK
+
+# License
+
+See link:LICENSE[LICENSE] file.
+
+

@@ -1,0 +1,70 @@
+batch
+
+set DB_JDBC_URL=jdbc:oracle:thin:@//192.168.230.44:1521/orcl
+set DB_USERNAME=KEYCLOAKTEST
+set DB_PASSWORD=5Hnx0buGit8K
+
+set FILE=/opt/eap/extensions/ojdbc8.jar
+
+set DB_DRIVER_NAME=oracle
+
+
+module add --name=com.oracle --resources=$FILE  --dependencies=javax.api,javax.resource.api
+
+
+/subsystem=datasources/jdbc-driver=$DB_DRIVER_NAME:add( \
+  driver-name=$DB_DRIVER_NAME, \
+  driver-module-name=com.oracle, \
+  driver-class-name=oracle.jdbc.driver.OracleDriver, \
+  driver-xa-datasource-class-name=oracle.jdbc.xa.client.OracleXADataSource \
+)
+
+/subsystem=datasources/data-source=KeycloakDS:remove()
+
+/subsystem=datasources/data-source=KeycloakDS:add( \
+  jndi-name=java:jboss/datasources/KeycloakDS, \
+  enabled=true, \
+  use-java-context=true, \
+  connection-url=$DB_JDBC_URL, \
+  driver-name=$DB_DRIVER_NAME, \
+  user-name=$DB_USERNAME, \
+  password=$DB_PASSWORD \
+)
+
+
+
+
+
+ /subsystem=datasources/data-source=KeycloakDS:write-attribute(name=background-validation, value=true)
+
+ /subsystem=datasources/data-source=KeycloakDS:write-attribute(name=background-validation-millis, value=30000)
+
+
+ /subsystem=datasources/data-source=KeycloakDS:write-attribute(name=validate-on-match, value=false)
+
+ /subsystem=datasources/data-source=KeycloakDS:write-attribute(name=check-valid-connection-sql, value=select 1)
+
+
+ /subsystem=datasources/data-source=KeycloakDS:write-attribute(name=valid-connection-checker-class-name, value=org.jboss.jca.adapters.jdbc.extensions.oracle.OracleValidConnectionChecker)
+
+ /subsystem=datasources/data-source=KeycloakDS:write-attribute(name=stale-connection-checker-class-name, value=org.jboss.jca.adapters.jdbc.extensions.oracle.OracleStaleConnectionChecker)
+
+ /subsystem=datasources/data-source=KeycloakDS:write-attribute(name=exception-sorter-class-name, value=org.jboss.jca.adapters.jdbc.extensions.oracle.OracleExceptionSorter)
+
+
+/subsystem=datasources/data-source=KeycloakDS:write-attribute(name=min-pool-size, value=${env.POOL_SIZE_MIN:150})
+
+/subsystem=datasources/data-source=KeycloakDS:write-attribute(name=max-pool-size, value=${env.POOL_SIZE_MAX:150})
+
+/subsystem=datasources/data-source=KeycloakDS:write-attribute(name=prepared-statements-cache-size, value=100)
+
+
+/subsystem=datasources/data-source=KeycloakDS:write-attribute(name=flush-strategy, value=IdleConnections)
+
+#/subsystem=undertow/server=default-server/http-listener=default:write-attribute(name=record-request-start-time,value=true)
+#/subsystem=undertow/server=default-server/https-listener=https:write-attribute(name=record-request-start-time,value=true)
+#/subsystem=undertow/server=default-server/host=default-host/setting=access-log:add(pattern="%h %l %u %t \"%r\" %s %b \"%{i,Referer}\" \"%{i,User-Agent}\" Cookie: \"%{i,COOKIE}\" Set-Cookie: \"%{o,SET-COOKIE}\" SessionID: %S Thread: \"%I\" TimeTaken: %T", use-server-log=true)
+
+#/subsystem=logging/logger=org.keycloak/:add(category=org.keycloak,level=TRACE,use-parent-handlers=true)
+
+run-batch
