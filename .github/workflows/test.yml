@@ -20,8 +20,8 @@ jobs:
         with:
           script: |
             github.rest.actions.createWorkflowDispatch({
-              owner: 'cee-hub',
-              repo: 'fe-varnish',
-              workflow_id: 'develop-com.yml',
-              ref: 'develop',
+              owner: 'chela256',
+              repo: 'npm-test',
+              workflow_id: 'test-workflow.yml',
+              ref: 'main',
             })
