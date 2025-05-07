@@ -1,0 +1,27 @@
+name: Production Deploy - COM
+on:
+  workflow_dispatch:
+    inputs:
+      issue_key:
+        description: 'The Jira issue key to update (e.g., ITSM-12345)'
+        required: true
+permissions:
+  contents: write
+  deployments: write
+  packages: write
+  id-token: write
+jobs:
+  build:
+    permissions: write-all
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Workflow
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.actions.createWorkflowDispatch({
+              owner: 'cee-hub',
+              repo: 'fe-varnish',
+              workflow_id: 'develop-com.yml',
+              ref: 'develop',
+            })
